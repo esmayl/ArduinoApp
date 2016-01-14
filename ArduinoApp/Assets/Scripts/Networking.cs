@@ -5,31 +5,48 @@ using UnityEngine.Networking;
 
 public class Networking : MonoBehaviour
 {
-    public int timeOut = 10;
-
     static WebClient client = new WebClient();
 
-    float timer = 0f;
+    static int lightSensorValue = 0;
+    static int temperatureSensor = 0;
+
+    int timeOut = 5;
+    float timeOutTimer = 0f;
+
+    float loopTimer = 0;
+    float resendTime = 0.5f;
 
     public void Awake()
     {
-        client.DownloadStringCompleted += ShowComplete;        
+        client.DownloadStringCompleted += ShowComplete;
+
+        SendRequest("http://192.168.1.200");
     }
 
     public void Update()
     {
         if (client.IsBusy)
         {
-            timer += Time.deltaTime;
+            timeOutTimer += Time.deltaTime;
 
-            if (timer > timeOut)
+            if (timeOutTimer > timeOut)
             {
-                timer = 0f;
+                timeOutTimer = 0f;
 
                 client.CancelAsync();
 
                 Debug.Log("Client got no response, connection timed out.");
             }
+        }
+        else if (loopTimer >= resendTime)
+        {
+            SendRequest("http://192.168.1.200");
+            loopTimer = 0;
+        }
+        
+        if (loopTimer < resendTime && !client.IsBusy)
+        {
+            loopTimer += Time.deltaTime;
         }
     }
 
@@ -38,11 +55,50 @@ public class Networking : MonoBehaviour
         if (client.IsBusy) { Debug.Log("Client is busy!"); return; }
         
         client.DownloadStringAsync(new Uri(url),null);
-        //client.DownloadString(String.Format("http://192.168.1.200/{0}={1}", pin, value));
     }
 
     public static void ShowComplete(object sender, DownloadStringCompletedEventArgs e)
     {
-        Debug.Log(""+e.Result);
+        if (e.Result != "")
+        {
+            Debug.Log("Page found!");
+        }
+        else { return; }
+
+        if (e.Result.Contains("LichtSensor"))
+        {
+            int indexPin = e.Result.IndexOf("LichtSensor");
+
+            string tempString = e.Result.Substring(indexPin + "LichtSensor".Length+2,1);
+            SetLightValue(int.Parse(tempString));
+        }
+        if (e.Result.Contains("TemperatuurSensor"))
+        {
+            int indexSensor = e.Result.IndexOf("TemperatuurSensor");
+
+            string tempString = e.Result.Substring(indexSensor + "TemperatuurSensor".Length + 2, 1);
+            SetTemperatureValue(int.Parse(tempString));
+        }
     }
+
+    public static void SetLightValue(int p)
+    {
+        lightSensorValue = p;
+    }
+    
+    public static void SetTemperatureValue(int p)
+    {
+        temperatureSensor = p;
+    }
+
+    public static int GetLightValue()
+    {
+        return lightSensorValue;
+    }
+
+    public static int GetTemperatureValue()
+    {
+        return temperatureSensor;
+    }
+
 }
