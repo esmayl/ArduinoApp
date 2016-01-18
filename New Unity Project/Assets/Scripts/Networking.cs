@@ -17,9 +17,6 @@ public class Networking : MonoBehaviour
     float loopTimer = 0;
     float resendTime = 0.5f;
 
-    public Toggle[] buttons;
-    
-
 
     public void Awake()
     {
