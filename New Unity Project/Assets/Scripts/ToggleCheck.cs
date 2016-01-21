@@ -19,6 +19,20 @@ public class ToggleCheck : MonoBehaviour
         toggle.onValueChanged.AddListener(Toggled);
     }
 
+    void Update()
+    {
+        if (Networking.client.IsBusy)
+        {
+            toggle.enabled = false;
+        }
+        else
+        {
+            toggle.enabled = true;
+            Networking.ResetLoopTimer();
+        }
+    }
+
+
     public void Toggled(bool value)
     {
         Debug.Log(value);

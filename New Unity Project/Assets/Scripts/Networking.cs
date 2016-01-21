@@ -6,16 +6,16 @@ using UnityEngine.Networking;
 
 public class Networking : MonoBehaviour
 {
-    static WebClient client = new WebClient();
+    public static WebClient client = new WebClient();
 
     static int lightSensorValue = 0;
     static int temperatureSensor = 0;
 
-    int timeOut = 5;
-    float timeOutTimer = 0f;
+    static float loopTimer = 0;
+    static float resendTime = 0.5f;
+    static float timeOutTimer = 0f;    
+    static int timeOut = 5;
 
-    float loopTimer = 0;
-    float resendTime = 0.5f;
 
 
     public void Awake()
@@ -29,33 +29,71 @@ public class Networking : MonoBehaviour
     {
         if (client.IsBusy)
         {
-            timeOutTimer += Time.deltaTime;
+            TickTimeOut(Time.deltaTime);
 
-            if (timeOutTimer > timeOut)
+            if (TimeOutCompare())
             {
-                timeOutTimer = 0f;
+                ResetTimeOutTimer();
 
                 client.CancelAsync();
 
                 Debug.Log("Client got no response, connection timed out.");
             }
         }
-        else if (loopTimer >= resendTime)
+        else if (LoopTimerCompare())
         {
             SendRequest("http://192.168.1.200");
-            loopTimer = 0;
+            ResetLoopTimer();
         }
         
-        if (loopTimer < resendTime && !client.IsBusy)
+        if (!LoopTimerCompare())
         {
-            loopTimer += Time.deltaTime;
+            TickLoopTimer(Time.deltaTime);
         }
     }
 
-    public static void SendRequest(string url)
+    public static void TickTimeOut(float tick)
     {
-        if (client.IsBusy) { Debug.Log("Client is busy!"); return; }
+        timeOutTimer += tick;
+    }
+
+    public static void TickLoopTimer(float tick)
+    {
+        loopTimer += tick;
+    }
+
+    public static bool TimeOutCompare()
+    {
+        if (timeOutTimer > timeOut)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    public static bool LoopTimerCompare()
+    {
+        if (loopTimer >= resendTime && !client.IsBusy)
+        {
+            return true;
+        }
         
+        return false;
+    }
+
+    public static void ResetLoopTimer()
+    {
+        loopTimer = 0;
+    }
+
+    public static void ResetTimeOutTimer()
+    {
+        timeOutTimer = 0;
+    }
+
+    public static void SendRequest(string url)
+    {      
         client.DownloadStringAsync(new Uri(url),null);
     }
 
