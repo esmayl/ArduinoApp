@@ -23,11 +23,11 @@ public class ToggleCheck : MonoBehaviour
     {
         if (Networking.client.IsBusy)
         {
-            toggle.enabled = false;
+            toggle.interactable = false;
         }
         else
         {
-            toggle.enabled = true;
+            toggle.interactable = true;
             Networking.ResetLoopTimer();
         }
     }

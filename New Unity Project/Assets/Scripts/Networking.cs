@@ -12,7 +12,7 @@ public class Networking : MonoBehaviour
     static int temperatureSensor = 0;
 
     static float loopTimer = 0;
-    static float resendTime = 0.5f;
+    static float resendTime = 0.25f;
     static float timeOutTimer = 0f;    
     static int timeOut = 5;
 

@@ -7,11 +7,11 @@ public class SensorValue : MonoBehaviour
     [Range(0,1)]
     public int sensorPin = 0;
 
-    Text sensorObject;
+    Image sensorObject;
 
     void Awake()
     {
-        sensorObject = GetComponent<Text>();
+        sensorObject = GetComponentInChildren<Image>();
     }
 
 	void Update ()
@@ -19,10 +19,24 @@ public class SensorValue : MonoBehaviour
 	    switch (sensorPin)
 	    {
             case 0:
-	                sensorObject.text = ""+Networking.GetLightValue();
+	                if (Networking.GetLightValue() > 0)
+	                {
+	                    sensorObject.CrossFadeColor(Color.red, 0.1f, true, true);
+	                }
+	                else
+	                {
+                        sensorObject.CrossFadeColor(Color.green, 0.1f, true, true);
+	                }
 	                break;
             case 1:
-	                sensorObject.text = ""+Networking.GetTemperatureValue();
+	                if (Networking.GetTemperatureValue() > 0)
+	                {
+	                    sensorObject.CrossFadeColor(Color.red, 0.1f, true, true);
+	                }
+	                else
+	                {
+                        sensorObject.CrossFadeColor(Color.green, 0.1f, true, true);
+	                }
                     break;
 	    }
 
